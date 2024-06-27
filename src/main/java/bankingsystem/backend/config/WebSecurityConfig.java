@@ -83,7 +83,7 @@ public class WebSecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:8080")); // Update as per your requirement
+        config.setAllowedOrigins(List.of("http://localhost:4200")); // Update as per your requirement
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("*"));
         source.registerCorsConfiguration("/**", config);

@@ -1,13 +1,14 @@
-
 package bankingsystem.backend.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,8 +19,9 @@ import java.util.function.Function;
 public class JwtTokenUtil implements Serializable {
 	private static final long serialVersionUID = -2550185165626007488L;
 	public static final long JWT_TOKEN_VALIDITY_FOR_LOGIN = 24 * 60 * 60;
-	@Value("${jwt.secret}")
-	private String secret;
+
+	// Secure key generation
+	private final SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
 	public String getUsernameFromToken(String token) {
 		return getClaimFromToken(token, Claims::getSubject);
@@ -44,7 +46,9 @@ public class JwtTokenUtil implements Serializable {
 	}
 
 	private Claims getAllClaimsFromToken(String token) {
-		return Jwts.parser().setSigningKey(secret).build().parseSignedClaims(token).getBody();
+//		return Jwts.parser().setSigningKey(token).parseClaimsJws(token).getBody();
+		return Jwts.parser().setSigningKey(token).build().parseSignedClaims(token).getBody();
+//		return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
 	}
 
 	private Boolean isTokenExpired(String token) {
@@ -60,13 +64,13 @@ public class JwtTokenUtil implements Serializable {
 	private String doGenerateTokenForLogin(Map<String, Object> claims, String subject) {
 		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY_FOR_LOGIN * 1000))
-				.signWith(SignatureAlgorithm.HS512, secret).compact();
+				.signWith(key, SignatureAlgorithm.HS512).compact();
 	}
 
 	private String doGenerateToken(Map<String, Object> claims, String subject) {
 		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY_FOR_LOGIN * 1000))
-				.signWith(SignatureAlgorithm.HS512, secret).compact();
+				.signWith(key, SignatureAlgorithm.HS512).compact();
 	}
 
 	public Boolean validateToken(String token, UserDetails userDetails) {

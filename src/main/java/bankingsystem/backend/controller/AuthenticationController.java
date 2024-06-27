@@ -53,5 +53,4 @@ public class AuthenticationController {
             throw new Exception("INVALID_CREDENTIALS", e);
         }
     }
-
 }
